@@ -1,4 +1,5 @@
 # muLISP
+========
 Files related to the muLISP programming language.
 
 muLISP was a LISP variant which had been developed by Soft Warehouse in Hawaii in 1977.
@@ -14,7 +15,7 @@ Derive for MS-DOS and MS-Windows had been very popular in the educational field.
 Derive was  taken over by Texas Instruments (TI) in 1999 for re-implementation in their pocket calculators (starting with the TI-92).
 TI ended the development of Derive for Windows in 2007. The last version was 6.10 for Windows 98, XP, 2000, written in muLISP for Derive, version 7.45 (which was not a product in itself).
 
-Known Versions:
+Known Versions
 ===============
 1980 muLISP-80 CP/M, with muStar, (8080), 10/06/80<br>
 

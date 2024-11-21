@@ -32,7 +32,7 @@ Known Versions:
 1988 muLISP-87 Soft Warehouse Version 6.03, IBM PC MS-DOS, 07/12/88<br>
 1988 muLISP-87 Soft Warehouse Version 6.10, IBM PC, MS-DOS, 12/07/88<br>
 
-1990 muLISP-90 IBM PC, Version 7.20 (02/07/94)<br>
 1993 muLISP-90 XM IBM PC, Version 7.16 (02/10/93)<br>
+1994 muLISP-90 IBM PC, Version 7.20 (02/07/94)<br>
 1994 muLISP-90 XM IBM PC, Version 7.20 (02/07/94)<br>
 1995 muLISP-90 XM MS-DOS, Version 7.30 (10/13/95)<br>

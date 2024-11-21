@@ -23,7 +23,6 @@ Known Versions:
 1982 muLISP-82 IBM PC and CP/M<br>
 
 1984 muLISP-83 Soft Warehouse Version 4.11 IBM PC, 03/22/84, licensed by Microsoft<br>
-1984 muMath-83 IBM PC, Version 4.12 (8088)<br>
 
 1985 muLISP-85 Microsoft LISP Version 5.01 IBM PC MS-DOS, 09/15/85<br>
 

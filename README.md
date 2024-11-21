@@ -1,11 +1,13 @@
 # muLISP
 Files related to the muLISP programming language.
 
-muLISP was a LISP variant which had been developed by Soft Warehouse in Hawaii.
-Initial versions were for CP/M, Apple II, TRS-80 and other Z80-based systems.
-Later the code was rewritten for the Intel 8086 processor and the MS-DOS operating system.
+muLISP was a LISP variant which had been developed by Soft Warehouse in Hawaii in 1977.
+Early versions were commercially available since 1979 for CP/M (8080,Z80), Apple II (native 6502/ADIOS as well as for the Z80 card), TRS-80 (Z80) and other Z80-based systems.
+
+In 1981 the rewritten code became available for the Intel 808x processor family and the MS-DOS operating system.
 The final version was muLISP-90.
 
-It was also distributed by Microsoft as Microsoft LISP.
+Since 1980 it was also licensed and distributed by Microsoft under the name "Microsoft LISP".
 
-muLISP was used to write the Computer Algebra System (CAS) Derive, which was finally taken over by Texas Instruments for re-implemantation in their pocket calculators.
+muLISP was intially developed for writing Computer Algebra Systems (CAS) muMath (1979) and Derive (1988).
+Derive was  taken over by Texas Instruments (TI) in 1999 for re-implemantation in their pocket calculators. TI ended the development of Derive for Windows in 2007. The last version was 6.10 for Windows 98, XP, 2000, written in muLISP for Derive, version 7.45 (which was not a product).

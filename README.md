@@ -1,7 +1,7 @@
 # muLISP
 Files related to the muLISP programming language.
 
-muLISP was a LISP variant which had been developed by Soft Warehouse in Hawaai.
+muLISP was a LISP variant which had been developed by Soft Warehouse in Hawaii.
 Initial versions were for CP/M, Apple II, TRS-80 and other Z80-based systems.
 Later the code was rewritten for the Intel 8086 processor and the MS-DOS operating system.
 The final version was muLISP-90.

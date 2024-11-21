@@ -1,5 +1,5 @@
 # muLISP
-========
+
 Files related to the muLISP programming language.
 
 muLISP was a LISP variant which had been developed by Soft Warehouse in Hawaii in 1977.

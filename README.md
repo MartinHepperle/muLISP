@@ -29,9 +29,9 @@ Known Versions:
 
 1986 muLISP-86 Microsoft LISP Version 5.10, IBM PC MS-DOS, 01/06/86
 
-1987 muLISP-87 Soft Warehouse Version 6.01, IBM PC MS-DOS, 06/17/87
-1988 muLISP-87 Soft Warehouse Version 6.03, IBM PC MS-DOS, 07/12/88
-1988 muLISP-87 Soft Warehouse Version 6.10, IBM PC, MS-DOS, 12/07/88
+1987 muLISP-87 Soft Warehouse Version 6.01, IBM PC MS-DOS, 06/17/87<br>
+1988 muLISP-87 Soft Warehouse Version 6.03, IBM PC MS-DOS, 07/12/88<br>
+1988 muLISP-87 Soft Warehouse Version 6.10, IBM PC, MS-DOS, 12/07/88<br>
 
 1990 muLISP-90 IBM PC, Version 7.20 (02/07/94)
 1993 muLISP-90 XM IBM PC, Version 7.16 (02/10/93)

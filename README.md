@@ -17,23 +17,26 @@ TI ended the development of Derive for Windows in 2007. The last version was 6.1
 
 Known Versions
 ===============
-1980 muLISP-80 CP/M, with muStar, (8080), 10/06/80<br>
 
-1981 muLISP-81 IBM PC and CP/M<br>
+CP/M
+--------------
+1980	muLISP-80	Version (8080), 10/06/80, before licensing to Microsoft
+1980	muLISP-80	Version 2.0, now "licensed by Microsoft"
+1981	muLISP-81	[detailed information missing]
+1982	muLISP-82	[detailed information missing]
+1984	muLISP-83	Version 4.11, 03/22/84
 
-1982 muLISP-82 IBM PC and CP/M<br>
-
-1984 muLISP-83 Soft Warehouse Version 4.11 IBM PC, 03/22/84, licensed by Microsoft<br>
-
-1985 muLISP-85 Microsoft LISP Version 5.01 IBM PC MS-DOS, 09/15/85<br>
-
-1986 muLISP-86 Microsoft LISP Version 5.10, IBM PC MS-DOS, 01/06/86<br>
-
-1987 muLISP-87 Soft Warehouse Version 6.01, IBM PC MS-DOS, 06/17/87<br>
-1988 muLISP-87 Soft Warehouse Version 6.03, IBM PC MS-DOS, 07/12/88<br>
-1988 muLISP-87 Soft Warehouse Version 6.10, IBM PC, MS-DOS, 12/07/88<br>
-
-1993 muLISP-90 XM IBM PC, Version 7.16 (02/10/93)<br>
-1994 muLISP-90 IBM PC, Version 7.20 (02/07/94)<br>
-1994 muLISP-90 XM IBM PC, Version 7.20 (02/07/94)<br>
-1995 muLISP-90 XM MS-DOS, Version 7.30 (10/13/95)<br>
+MS-DOS
+--------------
+1981	muLISP-81	[detailed information missing]
+1982	muLISP-82	[detailed information missing]
+1984	muLISP-83	Version 4.11 03/22/84
+1985	muLISP-85	Version 5.01 09/15/85, now "Microsoft LISP"
+1986	muLISP-86	Version 5.10, 01/06/86
+1987	muLISP-87	Version 6.01, 06/17/87
+1988	muLISP-87	Version 6.03, 07/12/88
+1988	muLISP-87	Version 6.10, 12/07/88
+1990	muLISP-90	Version 7.20 (02/07/94)
+1993	muLISP-90 XM	Version 7.16 (02/10/93)
+1994	muLISP-90 XM	Version 7.20 (02/07/94)
+1995	muLISP-90 XM	Version 7.30 (10/13/95)

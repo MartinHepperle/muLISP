@@ -7,3 +7,4 @@ https://archive.org/details/mulispxm_202409
 
 - HEX-EDIT.LSP is a demonstration Hex-Editor program - no very LISP specific application, but maybe useful for learning.
 - DIR.LSP is a simple MS-DOS directory list generator.
+- DIFF.LSP is a derivative calculator for algemaric expressions

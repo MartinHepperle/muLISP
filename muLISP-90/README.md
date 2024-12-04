@@ -10,4 +10,4 @@ https://archive.org/details/mulispxm_202409
 - DIFF.LSP is a derivative calculator for algebraic expressions in list form.
 - MH.LSP contains my "testbed" with some utility functions for conversion decimal<->hexadecimal and more.
 - VIDEO.LSP creates a simple video test image in VGA mode.
-- OBL-FILE.LSP writes the OBLIST to afile "OBLIST-90.TXT"
+- OBL-FILE.LSP writes the OBLIST to a file "OBLIST-90.TXT"

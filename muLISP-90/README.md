@@ -1,5 +1,6 @@
 Files related to muLISP-90.
-muLISP-90 was the last version of muLISP created by Soft Warehouse and sitributed by Microsoft.
+
+muLISP-90 was the last version of muLISP created by Soft Warehouse and distributed by Microsoft.
 
 See also
 https://archive.org/details/MULISPXM and 

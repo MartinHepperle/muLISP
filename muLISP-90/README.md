@@ -12,4 +12,4 @@ https://archive.org/details/mulispxm_202409
 - MH.LSP contains my "testbed" with some utility functions for conversion decimal<->hexadecimal and more.
 - VIDEO.LSP creates a simple video test image in VGA mode.
 - OBL-FILE.LSP writes the OBLIST to a file "OBLIST-90.TXT"
-- HPGL reads a plotter file in HP-GL format (e.g. TEST.GL) and plots it on the VGA screen
+- HPGL.LSP reads a plotter file in HP-GL format (e.g. TEST.GL) and plots it on the VGA screen

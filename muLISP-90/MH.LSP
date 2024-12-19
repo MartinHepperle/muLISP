@@ -3,8 +3,6 @@
 ;
 ; muLISP-90
 ;
-; Testbed and utility routines.
-;
 ; ========================================
 ; decimal-hexadecimal conversion functions
 ; ========================================
@@ -72,8 +70,8 @@
 ; concatenate a list of strings into a single string
 ; recursive
 (DEFUN STRLCAT (SLIST)
- (COND ( (NULL SLIST) NIL )
-       ( T            (CONS (CAR SLIST) (STRLCAT (CDR SLIST)))))
+ ((NULL SLIST) NIL) ; done
+ (CONS (CAR SLIST) (STRLCAT (CDR SLIST)))
  (PACK SLIST) 
 )
 

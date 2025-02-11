@@ -16,7 +16,7 @@
 ; F2 toggle edit mode on/off
 ; F3 insert bytes at cursor position - prompts for number of bytes, inserts '\0' bytes.
 ; F4 delete bytes at cursor position - prompts for number of bytes.
-; TAB toggly cursor between hexadecimal and ASCII view.
+; TAB toggle cursor between hexadecimal and ASCII view.
 ; Cursor motion: <=, =>, ^, v (cursor left, right, up, down).
 ; Record motion: Page-Up and Page-Down load the previous resp. the next record.
 ;

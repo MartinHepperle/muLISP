@@ -3,8 +3,11 @@ Files related to muLISP-90.
 muLISP-90 was the last version of muLISP created by Soft Warehouse and distributed by Microsoft.
 
 See also
+Software:
 https://archive.org/details/MULISPXM and 
 https://archive.org/details/mulispxm_202409
+Documentation:
+https://archive.org/details/mu-lisp-90-reference-manual
 
 - HEX-EDIT.LSP is a demonstration Hex-Editor program - no very LISP specific application, but maybe useful for learning.
 - DIR.LSP is a simple MS-DOS directory list generator.

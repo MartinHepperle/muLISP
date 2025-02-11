@@ -76,7 +76,7 @@
          (T             (SETQ ELEMENT (PACK* ELEMENT BYTE))))
 
    ; trigger garbage collection to avoid memory overflow
-   (COND ((EQ 5000 N) (RECLAIM)(SETQ LOOP-COUNT 0))
+   (COND ((EQ 5000 LOOP-COUNT) (RECLAIM)(SETQ LOOP-COUNT 0))
          (T (INCQ LOOP-COUNT)))
  )
 

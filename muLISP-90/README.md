@@ -15,6 +15,6 @@ https://archive.org/details/mu-lisp-90-reference-manual
 - DIR.LSP is a simple MS-DOS directory list generator.
 - DIFF.LSP is a derivative calculator for algebraic expressions in list form.
 - MH.LSP contains my "testbed" with some utility functions for conversion decimal<->hexadecimal and more.
-- VIDEO.LSP creates a simple video test image in VGA mode.
+- VIDEO.LSP creates a simple video test image in VGA mode and saves it to a BMP file.
 - OBL-FILE.LSP writes the OBLIST to a file "OBLIST-90.TXT"
 - HPGL.LSP reads a plotter file in HP-GL format (e.g. TEST.GL) and plots it on the VGA screen

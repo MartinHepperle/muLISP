@@ -281,10 +281,10 @@
   (PRINC "RTYPE=")(PRIN1 RTYPE)(PRINC ": ")
   (COND
    ((EQ RTYPE 0)(PRINC "BOF")
-   (COND
-   ((EQ (CAR BYTES) 4)(PRINC " (R1.x)"))
-   ((EQ (CAR BYTES) 5)(PRINC " (Symphony)"))
-   ((EQ (CAR BYTES) 6)(PRINC " (R2.x)"))
+    (COND
+     ((EQ (CAR BYTES) 4)(PRINC " (R1.x)"))
+     ((EQ (CAR BYTES) 5)(PRINC " (Symphony)"))
+     ((EQ (CAR BYTES) 6)(PRINC " (R2.x)"))
    ))
    ((EQ RTYPE 1)(PRINC "EOF"))
    ((EQ RTYPE 2)(PRINC "CALC MODE"))
@@ -300,8 +300,7 @@
    ((EQ RTYPE 12)(PRINC "BLANK"))
    ((EQ RTYPE 13)(PRINC "INTEGER")(CELLHDR BYTES)(INTEGER BYTES 5))
    ((EQ RTYPE 14)(PRINC "NUMBER") (CELLHDR BYTES)(NUMBER BYTES 5))
-   ((EQ RTYPE 15)(PRINC "ASCIIZ") (CELLHDR BYTES)
-                 (PRINC ", ")(ASCIIZ BYTES 5))
+   ((EQ RTYPE 15)(PRINC "ASCIIZ") (CELLHDR BYTES)(PRINC ", ")(ASCIIZ BYTES 5))
    ((EQ RTYPE 16)(PRINC "FORMULA")(CELLHDR BYTES)(FORMULA BYTES 5 FUNCS))
    ; 11h-17h undefined
    ((EQ RTYPE 24)(PRINC "TABLE"))
@@ -334,7 +333,9 @@
    ((EQ RTYPE 56)(PRINC "LOCKED"))
    ; 
    ((EQ RTYPE 60)(PRINC "QUERY"))
-   ; 
+   ;
+   ((EQ RTYPE 71)(PRINC "NAMED RANGE")(ASCIIZ BYTES 0)(CELLREF BYTES 16)(CELLREF BYTES 20))
+   ;
    ((EQ RTYPE 100)(PRINC "HIDDEN VECTOR1")) ; 64h
    ((EQ RTYPE 101)(PRINC "HIDDEN VECTOR2"))
    ((EQ RTYPE 102)(PRINC "PARSE RANGES"))
@@ -358,4 +359,5 @@
 )
 
 ; ------------------------------------------------------------------
-(READ-WK1 "TEST.WK1")
+;(READ-WK1 "TEST.WK1")
+(READ-WK1 "MYRANGE.WK1")

@@ -20,20 +20,40 @@
 ; ------------------------------------------------------------------
 ; Read the 4 bytes of a range reference inside an formula
 (DEFUN RANGEREF ( BYTES IDX
-                  COL ROW )
+                  COL ROW TMP )
  ;  IDX:   column
  ;  IDX+2: row
  (SETQ COL (LOGIOR(NTH IDX BYTES)      (SHIFT(NTH (+ IDX 1) BYTES)8)))
  (SETQ ROW (LOGIOR(NTH (+ IDX 2) BYTES)(SHIFT(NTH (+ IDX 3) BYTES)8)))
 
- ; ranges inside a formula are encoded in 13 bits and slight encrypted +1, +4?
- ; 0-based row = 'A' (COL + 1) AND 0x1FFF
- (SETQ COL (LOGAND (+ COL 1) 8191))
- ; 0-based column = (ROW + 4) AND 0x1FFF
- (SETQ ROW (LOGAND (+ ROW 4) 8191))
+ ; coordinates are 0-based
 
- (PRINC ", COL:")(PRIN1 COL)
- (PRINC ", ROW:")(PRIN1 ROW)
+ ; column
+ (COND
+  ((ZEROP (LOGAND COL 32768)) ; if bit 15 clear: absolute reference
+    (PRINC "$")
+    (SETQ TMP (DIVIDE COL 26))
+    (IF (> COL 25)(PRINC (ASCII(+(CAR TMP) 64))))
+    (PRINC (ASCII(+(CADR TMP) 65)))
+  )
+  ; else: relative reference
+  (T (SETQ COL (LOGAND COL 8191)) 
+     (IF (> COL 4095) (DECQ COL 8192)) ; negative offset
+     (PRINC "C(")(PRIN1 COL)(PRINC ")")
+  ) 
+ )
+ ; row
+ (COND
+  ((ZEROP (LOGAND ROW 32768)) ; absolute reference
+   (PRINC "$")
+   (PRIN1 (+ ROW 1)) ; absolute addresses are 1 based
+  )
+  ; else: relative reference
+  (T (SETQ ROW (LOGAND ROW 8191)) 
+  (IF (> ROW 4095) (DECQ ROW 8192)) ; negative offset
+     (PRINC "R(")(PRIN1 ROW)(PRINC ")")  
+  )             ; relative
+ )
 )
 
 ; ------------------------------------------------------------------
@@ -62,34 +82,21 @@
  (SETQ LENGTH (LOGIOR(NTH IDX BYTES)(SHIFT(NTH (+ IDX 1) BYTES)8)))
  (INCQ IDX 2)
  (PRINC ", LENGTH:")(PRIN1 LENGTH)(TERPRI)
+ (PRINC "  ")
 
- ;(PRINT BYTES)
-
-; Formule: @SUM(A1..B4)+2.5
+; Formula: @SUM(A1..B4)+2.5
 ; 02 FFBF FCBF 0080 FCBF range A1..B1  push range
 ; 50 01                  @SUM[1]       perform SUM with 1 parameter
 ; 00 0000000000000440    2.5           push 2.5
 ; 09                     +             perform +
 ; 03                     end           done
-; the range encoding inside a formula is undocumented?:
-; 0-based column = (COL + 1) AND 1FFF
-; 0-based row =    (ROW + 4) AND 1FFF
-;      14 bits          xxx.00000.00000000
-; A =    191 255  BF FF 101.11111.11111111 = 0
-; B =    128 000  80 00 100.00000.00000000
-; C =    128 001  80 01 100.00000.00000001
-; D =    128 002  80 02 100.00000.00000010
-; E =    128 003  80 03 100.00000.00000011
-; IV =   128 254  80 FE 100.00000.11111110 = 255
-;                          
-; 1 =    191 252  BF FC 101.11111.11111100
-; 2 =    191 253  BF FD 101.11111.11111101
-; 3 =    191 254  BF FE 101.11111.11111110
-; 4 =    191 255  BF FF 101.11111.11111111
-; 5 =    128 000  80 00 100.00000.00000000
-; 6 =    128 001  80 01 100.00000.00000001
-; 8192 = 159 251  9F FB 100.11111.11111011
-;
+; the range encoding inside a formula is undocumented.
+; Range coordinates can be absolute ($ prefix) or relative
+; (+/- to current cell) references.
+;      0x1FFF 8191d         11111 11111111
+;      13 bits used?    Rxx.00000.00000000
+;                       ^ bit 15 set if offset to current cell (relative reference)
+
  (LOOP
   ((ZEROP IDX)) ; break
   (SETQ CODE (NTH IDX BYTES))
@@ -102,8 +109,8 @@
   (COND
     ((EQ CODE  0)(NUMBER BYTES IDX)(INCQ IDX 8)) ; CONST: read double number
     ((EQ CODE  1)(CELLREF BYTES IDX)(INCQ IDX 4))                   ; VAR:   
-    ((EQ CODE  2)(RANGEREF BYTES IDX)(INCQ IDX 4) ; RANGE: Col,Row Col,Row
-                 (RANGEREF BYTES IDX)(INCQ IDX 4))
+    ((EQ CODE  2)(PRINC "[")(RANGEREF BYTES IDX)(INCQ IDX 4) ; RANGE: Col,Row Col,Row
+                 (PRINC ":")(RANGEREF BYTES IDX)(INCQ IDX 4)(PRINC "]"))
     ((EQ CODE  3)(SETQ IDX 0)) ; break           ; END:   
     ((EQ CODE  5)(INTEGER BYTES IDX)(INCQ IDX 2))  ; INTEGER
     ((EQ CODE  6)(INCQ IDX (ASCIIZ BYTES IDX)))  ; ASCIIZ: read characters
@@ -212,7 +219,7 @@
 ; Return length of string, including the terminating zero byte
 (DEFUN ASCIIZ ( BYTES IDX
                 IDX0 )
- (PRINC "[")
+ (PRINC "\"")
  (SETQ IDX0 IDX) ; save starting index
  (LOOP
   ((ZEROP (NTH IDX BYTES))) ; done
@@ -220,7 +227,7 @@
   (INCQ IDX)
  )
  (INCQ IDX) ; skip null-byte
- (PRINC "]")
+ (PRINC "\"")
  (- IDX IDX0) ; return length
 )
 
@@ -232,7 +239,7 @@
 ; indexed list of formula functions
  (SETQ FUNCS
   (LIST
-   ; 0...9 (PRINC "+" would execute the "+" function, therefore quote and not "+"
+   ; 0...9 (PRINC "+") would execute the "+" function, therefore quote and not "+"
    'RCONST 'VAR 'RANGE 'END 'PARENS 'ICONST 'ASCIIZ '?7? 'NEG '+ 
    ; 10...19
    '- '* '/ '^ '= '<> '<= '>= '< '> 
@@ -258,6 +265,14 @@
    '@CLEAN '@S '@V '@STREQ '@CALL '@INDIRECT))
 
  (OPEN-INPUT-FILE FILE-NAME)
+
+ (SETQ OFILE-NAME (PACK* (SUBSTRING FILE-NAME 0 (FINDSTRING ".WK1" FILE-NAME)) "TXT"))
+ (OPEN-OUTPUT-FILE OFILE-NAME)
+ 
+ (WRITE-STRING FILE-NAME) 
+ (WRITE-STRING (ASCII 13))(WRITE-STRING (ASCII 10)) 
+ (WRITE-STRING "============") 
+ (WRITE-STRING (ASCII 13))(WRITE-STRING (ASCII 10)) 
   
  (SETQ RECNO 0)
  (LOOP
@@ -265,7 +280,7 @@
   (INCQ RECNO)
   (SETQ RTYPE (LOGIOR (READ-BYTE)(SHIFT (READ-BYTE) 8)))
   (SETQ RLEN (LOGIOR (READ-BYTE)(SHIFT (READ-BYTE) 8)))
-  ; collect bytes in list
+  ; collect bytes
   (SETQ BYTES '())
   (LOOP
    ((ZEROP RLEN))
@@ -277,6 +292,7 @@
   (SETQ RLEN (LENGTH BYTES))
   ; BYTES contains the record data without type and length words
  
+  ; Lotus 1-2-3 and Symphonie record types
   (TERPRI)
   (PRINC "RTYPE=")(PRIN1 RTYPE)(PRINC ": ")
   (COND
@@ -313,41 +329,55 @@
    ((EQ RTYPE 32)(PRINC "H RANGE"))
    ; undefined
    ((EQ RTYPE 35)(PRINC "KEY RANGE2"))
-   ((EQ RTYPE 36)(PRINC "PROTECT"))
+   ; if PROTECT <> 0 then all cell data will be nonsense because
+   ; they are encrypted with the password
+   ((EQ RTYPE 36)(PRINC "PROTECT")(PRINC ": ")(PRINC (CAR BYTES))) ; 30d
    ((EQ RTYPE 37)(PRINC "FOOTER"))
    ((EQ RTYPE 38)(PRINC "HEADER"))
    ((EQ RTYPE 39)(PRINC "SETUP"))
    ((EQ RTYPE 40)(PRINC "MARGINS"))
    ((EQ RTYPE 41)(PRINC "LABEL FORMAT"))
    ((EQ RTYPE 42)(PRINC "TITLES"))
-   ; 
+   ; undefined
    ((EQ RTYPE 45)(PRINC "GRAPH"))
    ((EQ RTYPE 46)(PRINC "NAMED GRAPH"))
    ((EQ RTYPE 47)(PRINC "CALC COUNT"))
    ((EQ RTYPE 48)(PRINC "UNFORMATTED"))
-   ; 
+   ; undefined
    ((EQ RTYPE 50)(PRINC "WINDOW"))
    ((EQ RTYPE 51)(PRINC "STRING"))
-   ; 
+   ; undefined
    ((EQ RTYPE 55)(PRINC "LOCK PASSWORD"))
    ((EQ RTYPE 56)(PRINC "LOCKED"))
-   ; 
+   ; undefined
    ((EQ RTYPE 60)(PRINC "QUERY"))
-   ;
+   ((EQ RTYPE 61)(PRINC "QUERY NAME"))
+   ((EQ RTYPE 62)(PRINC "PRINT"))
+   ((EQ RTYPE 63)(PRINC "PRINT NAME"))
+   ((EQ RTYPE 64)(PRINC "HRAPH 2"))
+   ((EQ RTYPE 65)(PRINC "GRAPH NAME"))
+   ((EQ RTYPE 66)(PRINC "ZOOM"))
+   ((EQ RTYPE 67)(PRINC "SYMPHONY SPLIT"))
+   ((EQ RTYPE 68)(PRINC "NUMBER SCREEN ROWS"))
+   ((EQ RTYPE 69)(PRINC "NUMBER SCREEN COLUMNS"))
+   ((EQ RTYPE 70)(PRINC "RULER"))
    ((EQ RTYPE 71)(PRINC "NAMED RANGE")(ASCIIZ BYTES 0)(CELLREF BYTES 16)(CELLREF BYTES 20))
-   ;
-   ((EQ RTYPE 100)(PRINC "HIDDEN VECTOR1")) ; 64h
-   ((EQ RTYPE 101)(PRINC "HIDDEN VECTOR2"))
+   ((EQ RTYPE 72)(PRINC "AUTO COMM"))
+   ((EQ RTYPE 73)(PRINC "AUTO MACRO"))
+   ((EQ RTYPE 74)(PRINC "PARSE"))
+   ((EQ RTYPE 75)(PRINC "PASSWORD")(PRIN1 BYTES)) ; 2 data bytes (docs say: 4), password for record data
+   ; undefined
+   ((EQ RTYPE 100)(PRINC "HIDDEN VECTOR1")) ; 64h, 1 bit per column which is hidden
+   ((EQ RTYPE 101)(PRINC "HIDDEN VECTOR2")) ; 65h, probably for rows
    ((EQ RTYPE 102)(PRINC "PARSE RANGES"))
    ((EQ RTYPE 103)(PRINC "REGRESS RANGES"))
-   ((EQ RTYPE 104)(PRINC "68h"))
    ((EQ RTYPE 105)(PRINC "MATRIX RANGES"))
-   ;
-   ((EQ RTYPE 107)(PRINC "6Bh")) ; 6Bh
-   ;
+   ; undefined
    ((EQ RTYPE 150)(PRINC "MATRIX RANGES")) ; 96h
+   ; undefined
+   (T (PRINC "UNKNOWN, DATA=")(PRIN1 BYTES))
   )
-  (TERPRI)
+  ;(TERPRI)
 
   ; DEBUG
   ;(PRINC "  DATA[")(PRIN1 RLEN)(PRINC "] = ")(PRIN1 BYTES)
@@ -355,9 +385,15 @@
   ((EQ RTYPE 1)) ; break
  ) ; record loop
 
+ (TERPRI)
+ 
  (CLOSE-INPUT-FILE FILE-NAME)
+ (CLOSE-OUTPUT-FILE OFILE-NAME)
+
+ ; compact memory
+ (RECLAIM)
 )
 
 ; ------------------------------------------------------------------
-;(READ-WK1 "TEST.WK1")
-(READ-WK1 "MYRANGE.WK1")
+(READ-WK1 "TEST.WK1")
+;(READ-WK1 "PROTECTE.WK1")

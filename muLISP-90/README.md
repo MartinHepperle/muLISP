@@ -19,4 +19,4 @@ https://archive.org/details/mu-lisp-90-reference-manual
 - ExcelToWK1 contains a VBA module with a function to export an Excel 2010 worksheet to a file in WK1 format (formulas can be exported as their result or as text for manual conversion).
 - MH.LSP contains my "testbed" with some utility functions for conversion decimal<->hexadecimal and more.
 - OBL-FILE.LSP writes the OBLIST to a file "OBLIST-90.TXT".
-- VIDEO.LSP creates a simple video test image in VGA mode and saves it to a BMP file.
+- VIDEO.LSP creates a simple video test image in VGA mode and contains forms to save it to a BMP file.

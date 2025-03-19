@@ -5,16 +5,32 @@
 ;
 
 ; ------------------------------------------------------------------
+; Read a 16-bit integer number starting at byte IDX in list BYTES.
+; Return the value read.
+(DEFUN INTEGER ( BYTES IDX )
+ ; IDX:    low byte
+ ; IDX+1:  high byte
+ (SETQ VALUE (LOGIOR (NTH IDX BYTES)(SHIFT(NTH (+ IDX 1) BYTES)8) ))
+ (IF (> VALUE 32767)(DECQ VALUE 65536))
+ ;  7FFF...0001...0000...FFFF...8000 
+ ; 32767      1      0     -1   -32768
+ (PRINC ", INTEGER VALUE: ")(PRIN1 VALUE)
+ VALUE
+)
+; ------------------------------------------------------------------
 ; Read the 4 bytes of a cell reference
+; Return a list of column and row read.
 (DEFUN CELLREF ( BYTES IDX
                  COL ROW )
  ;  IDX:   column
  ;  IDX+2: row
- (SETQ COL (LOGIOR(NTH IDX BYTES)      (SHIFT(NTH (+ IDX 1) BYTES)8)))
- (SETQ ROW (LOGIOR(NTH (+ IDX 2) BYTES)(SHIFT(NTH (+ IDX 3) BYTES)8)))
+ (SETQ COL (INTEGER BYTES IDX))
+ (SETQ ROW (INTEGER BYTES (+ IDX 2)))
 
  (PRINC ", COL:")(PRIN1 COL)
  (PRINC ", ROW:")(PRIN1 ROW)
+ ; return reference
+ (LIST COL ROW)
 )
 
 ; ------------------------------------------------------------------
@@ -37,7 +53,7 @@
     (PRINC (ASCII(+(CADR TMP) 65)))
   )
   ; else: relative reference
-  (T (SETQ COL (LOGAND COL 8191)) 
+  (T (SETQ COL (LOGAND COL 8191))      ; 0x1FFF
      (IF (> COL 4095) (DECQ COL 8192)) ; negative offset
      (PRINC "C(")(PRIN1 COL)(PRINC ")")
   ) 
@@ -58,6 +74,7 @@
 
 ; ------------------------------------------------------------------
 ; Read the first 5 common header bytes of a cell
+; Return a list of column and row read.
 (DEFUN CELLHDR ( BYTES
                  FMT )
  ;    0: format
@@ -90,12 +107,12 @@
 ; 00 0000000000000440    2.5           push 2.5
 ; 09                     +             perform +
 ; 03                     end           done
-; the range encoding inside a formula is undocumented.
+; 
 ; Range coordinates can be absolute ($ prefix) or relative
 ; (+/- to current cell) references.
 ;      0x1FFF 8191d         11111 11111111
 ;      13 bits used?    Rxx.00000.00000000
-;                       ^ bit 15 set if offset to current cell (relative reference)
+;                       ^ bit 15 set if relative reference
 
  (LOOP
   ((ZEROP IDX)) ; break
@@ -114,7 +131,7 @@
     ((EQ CODE  3)(SETQ IDX 0)) ; break           ; END:   
     ((EQ CODE  5)(INTEGER BYTES IDX)(INCQ IDX 2))  ; INTEGER
     ((EQ CODE  6)(INCQ IDX (ASCIIZ BYTES IDX)))  ; ASCIIZ: read characters
-    ; 80-84: @SUM..@MAX variable size arguments have 1 byte argument count
+    ; 80-84: @SUM..@MAX variable # of arguments: followed by 1 byte argument count
     ((<= 80 CODE 84)(PRINC "[")(PRIN1 (NTH IDX BYTES))(PRINC "]")(INCQ IDX))
   )
  )
@@ -123,8 +140,8 @@
 
 ; ------------------------------------------------------------------
 ; Read a IEEE 754 64-bit floating point number
-; starting at byte IDX in list BYTES..
-; Format of an IEEE floating point number
+; starting at byte IDX in list BYTES.
+; Format of an IEEE floating point number in Intel order
 ;     ex. 2.25 : 0x0 0x0 0x0 0x00 0x00 0x00 0x02 0x40
 ;                                      |    |    S.EEEEEEE
 ;                                      |    EEEE.MMMM 
@@ -132,8 +149,8 @@
 (DEFUN NUMBER ( BYTES IDX
                 B1 B2 B3 B4 B5 B6 B7 B8
                 ISNAN SIGN EXPONENT SIGNIFICAND VALUE )
- ; B8 B7 B6 B5 B4 B3 B2 B1 bytes
- ; SE EM MM MM MM MM MM MM nibbles
+ ; B1 B2 B3 B4 B5 B6 B7 B8 bytes
+ ; MM MM MM MM MM MM EM SE nibbles
  
                             ; bits
  (SETQ B1 (NTH IDX BYTES))  ; MMMMMMMM LSB Mantissa
@@ -167,11 +184,11 @@
  
  ; detect NaN, zero or regular number
  (COND
-  ; test for NaN: all E bits set to one
+  ; if NaN: all E bits set to one
   ((AND(EQ (LOGAND B8 127) 127)(EQ (LOGAND B7 240) 240))(SETQ ISNAN T))
-  ; test for zero (may be signed)
+  ; if zero:
   ((= 0 B1 B2 B3 B4 B5 B6 B7 (LOGAND B8 127)) (SETQ VALUE 0) )
-  ; convert number
+  ; else: convert number
   ( T
      ; decode IEEE number
      ; sign
@@ -185,7 +202,7 @@
      (SETQ SUM (+ (/ SUM 256) B4)) ; ...
      (SETQ SUM (+ (/ SUM 256) B5)) ; ...
      (SETQ SUM (+ (/ SUM 256) B6)) ; ...
-     (SETQ SUM (+ (/ SUM 256) (LOGAND B7 15))) ; mask add the last 4 MSBits
+     (SETQ SUM (+ (/ SUM 256) (LOGAND B7 15))) ; mask and add the last 4 MSBits
      (SETQ SIGNIFICAND (+ 1 (/ SUM 16))) ; shift 4 mantissa bits and add 1
      ; compute final value
      ; 2 ^ EXPONENT
@@ -204,14 +221,6 @@
  (IF ISNAN (PRINC "NaN")
            (PROGN(PRIN1 VALUE))
  )
-)
-; ------------------------------------------------------------------
-; Read a 16-bit integer number starting at byte IDX in list BYTES.
-(DEFUN INTEGER ( BYTES IDX
-                 VALUE )
-
- (SETQ VALUE (LOGIOR (NTH IDX BYTES)(SHIFT(NTH (+ IDX 1) BYTES)8) ))
- (PRINC ", INTEGER VALUE: ")(PRIN1 VALUE)
 )
 
 ; ------------------------------------------------------------------
@@ -240,11 +249,11 @@
  (SETQ FUNCS
   (LIST
    ; 0...9 (PRINC "+") would execute the "+" function, therefore quote and not "+"
-   'RCONST 'VAR 'RANGE 'END 'PARENS 'ICONST 'ASCIIZ '?7? 'NEG '+ 
+   'RCONST 'VAR 'RANGE 'END 'PARENS 'ICONST 'ASCIIZ '?7? 'U- '+ 
    ; 10...19
    '- '* '/ '^ '= '<> '<= '>= '< '> 
    ; 20...29  (25-30 unused)
-   'AND 'OR 'NOT '+ '& '?25? '?26? '?27? '?28? '?29?
+   '#AND# '#OR# '#NOT# 'U+ '& '?25? '?26? '?27? '?28? '?29?
    ; 30...39
    '?30? '@NA '@ERR '@ABS '@INT '@SQRT '@LOG '@LN '@PI '@SIN 
    ; 40...49
@@ -292,7 +301,7 @@
   (SETQ RLEN (LENGTH BYTES))
   ; BYTES contains the record data without type and length words
  
-  ; Lotus 1-2-3 and Symphonie record types
+  ; Lotus 1-2-3 and Symphonie only record types
   (TERPRI)
   (PRINC "RTYPE=")(PRIN1 RTYPE)(PRINC ": ")
   (COND
@@ -307,16 +316,17 @@
    ((EQ RTYPE 3)(PRINC "CALC ORDER"))
    ((EQ RTYPE 4)(PRINC "WINDOW SPLIT"))
    ((EQ RTYPE 5)(PRINC "WINDOW SYNC"))
-   ((EQ RTYPE 6)(PRINC "SAVE RANGE")(CELLREF BYTES 0)(CELLREF BYTES 4))
-   ((EQ RTYPE 7)(PRINC "WINDOW1"))
-   ((EQ RTYPE 8)(PRINC "COLUMN WIDTH1"))
-   ((EQ RTYPE 9)(PRINC "WINDOW2"))
-   ((EQ RTYPE 10)(PRINC "COLUMN WIDTH2"))
+   ((EQ RTYPE 6)(PRINC "SAVE RANGE")(SETQ TOP-LEFT(CELLREF BYTES 0))
+                                    (SETQ BOT-RIGHT(CELLREF BYTES 4)))
+   ((EQ RTYPE 7)(PRINC "WINDOW W1"))
+   ((EQ RTYPE 8)(PRINC "COLUMN WIDTH W1"))
+   ((EQ RTYPE 9)(PRINC "WINDOW W2"))
+   ((EQ RTYPE 10)(PRINC "COLUMN WIDTH W2"))
    ((EQ RTYPE 11)(PRINC "NAME"))
    ((EQ RTYPE 12)(PRINC "BLANK"))
    ((EQ RTYPE 13)(PRINC "INTEGER")(CELLHDR BYTES)(INTEGER BYTES 5))
    ((EQ RTYPE 14)(PRINC "NUMBER") (CELLHDR BYTES)(NUMBER BYTES 5))
-   ((EQ RTYPE 15)(PRINC "ASCIIZ") (CELLHDR BYTES)(PRINC ", ")(ASCIIZ BYTES 5))
+   ((EQ RTYPE 15)(PRINC "LABEL") (CELLHDR BYTES)(PRINC ", ")(ASCIIZ BYTES 5))
    ((EQ RTYPE 16)(PRINC "FORMULA")(CELLHDR BYTES)(FORMULA BYTES 5 FUNCS))
    ; 11h-17h undefined
    ((EQ RTYPE 24)(PRINC "TABLE"))
@@ -324,12 +334,12 @@
    ((EQ RTYPE 26)(PRINC "PRINT RANGE"))
    ((EQ RTYPE 27)(PRINC "SORT RANGE"))
    ((EQ RTYPE 28)(PRINC "FILL RANGE"))
-   ((EQ RTYPE 29)(PRINC "KEY RANGE1"))
+   ((EQ RTYPE 29)(PRINC "KEY RANGE 1"))
    ; undefined
    ((EQ RTYPE 32)(PRINC "H RANGE"))
    ; undefined
-   ((EQ RTYPE 35)(PRINC "KEY RANGE2"))
-   ; if PROTECT <> 0 then all cell data will be nonsense because
+   ((EQ RTYPE 35)(PRINC "KEY RANGE 2"))
+   ; if PROTECT == 1 then all cell data will be nonsense because
    ; they are encrypted with the password
    ((EQ RTYPE 36)(PRINC "PROTECT")(PRINC ": ")(PRINC (CAR BYTES))) ; 30d
    ((EQ RTYPE 37)(PRINC "FOOTER"))
@@ -343,32 +353,33 @@
    ((EQ RTYPE 46)(PRINC "NAMED GRAPH"))
    ((EQ RTYPE 47)(PRINC "CALC COUNT"))
    ((EQ RTYPE 48)(PRINC "UNFORMATTED"))
+   ((EQ RTYPE 49)(PRINC "CURSOR W1+W2"))           
+   ((EQ RTYPE 50)(PRINC "WINDOW"))                 ; Symphonie only
+   ((EQ RTYPE 51)(PRINC "STRING"))                 ; Symphonie only
    ; undefined
-   ((EQ RTYPE 50)(PRINC "WINDOW"))
-   ((EQ RTYPE 51)(PRINC "STRING"))
+   ((EQ RTYPE 55)(PRINC "LOCK PASSWORD"))          ; Symphonie only
+   ((EQ RTYPE 56)(PRINC "LOCKED"))                 ; Symphonie only
    ; undefined
-   ((EQ RTYPE 55)(PRINC "LOCK PASSWORD"))
-   ((EQ RTYPE 56)(PRINC "LOCKED"))
+   ((EQ RTYPE 60)(PRINC "QUERY"))                  ; Symphonie only
+   ((EQ RTYPE 61)(PRINC "QUERY NAME"))             ; Symphonie only
+   ((EQ RTYPE 62)(PRINC "PRINT"))                  ; Symphonie only
+   ((EQ RTYPE 63)(PRINC "PRINT NAME"))             ; Symphonie only
+   ((EQ RTYPE 64)(PRINC "GRAPH 2"))                ; Symphonie only
+   ((EQ RTYPE 65)(PRINC "GRAPH NAME"))             ; Symphonie only
+   ((EQ RTYPE 66)(PRINC "ZOOM"))                   ; Symphonie only
+   ((EQ RTYPE 67)(PRINC "SYMPHONY SPLIT"))         ; Symphonie only
+   ((EQ RTYPE 68)(PRINC "NUMBER SCREEN ROWS"))     ; Symphonie only
+   ((EQ RTYPE 69)(PRINC "NUMBER SCREEN COLUMNS"))  ; Symphonie only
+   ((EQ RTYPE 70)(PRINC "RULER"))                  ; Symphonie only
+   ((EQ RTYPE 71)(PRINC "NAMED RANGE")             ; Symphonie only
+    (ASCIIZ BYTES 0)(CELLREF BYTES 16)(CELLREF BYTES 20))
+   ((EQ RTYPE 72)(PRINC "AUTO COMM"))              ; Symphonie only
+   ((EQ RTYPE 73)(PRINC "AUTO MACRO"))             ; Symphonie only
+   ((EQ RTYPE 74)(PRINC "PARSE"))                  ; Symphonie only
+   ((EQ RTYPE 75)(PRINC "PASSWORD")(PRIN1 BYTES)) ; 2 data bytes (docs say: 4), password for record data?
    ; undefined
-   ((EQ RTYPE 60)(PRINC "QUERY"))
-   ((EQ RTYPE 61)(PRINC "QUERY NAME"))
-   ((EQ RTYPE 62)(PRINC "PRINT"))
-   ((EQ RTYPE 63)(PRINC "PRINT NAME"))
-   ((EQ RTYPE 64)(PRINC "HRAPH 2"))
-   ((EQ RTYPE 65)(PRINC "GRAPH NAME"))
-   ((EQ RTYPE 66)(PRINC "ZOOM"))
-   ((EQ RTYPE 67)(PRINC "SYMPHONY SPLIT"))
-   ((EQ RTYPE 68)(PRINC "NUMBER SCREEN ROWS"))
-   ((EQ RTYPE 69)(PRINC "NUMBER SCREEN COLUMNS"))
-   ((EQ RTYPE 70)(PRINC "RULER"))
-   ((EQ RTYPE 71)(PRINC "NAMED RANGE")(ASCIIZ BYTES 0)(CELLREF BYTES 16)(CELLREF BYTES 20))
-   ((EQ RTYPE 72)(PRINC "AUTO COMM"))
-   ((EQ RTYPE 73)(PRINC "AUTO MACRO"))
-   ((EQ RTYPE 74)(PRINC "PARSE"))
-   ((EQ RTYPE 75)(PRINC "PASSWORD")(PRIN1 BYTES)) ; 2 data bytes (docs say: 4), password for record data
-   ; undefined
-   ((EQ RTYPE 100)(PRINC "HIDDEN VECTOR1")) ; 64h, 1 bit per column which is hidden
-   ((EQ RTYPE 101)(PRINC "HIDDEN VECTOR2")) ; 65h, probably for rows
+   ((EQ RTYPE 100)(PRINC "HIDDEN COL VECTOR W1")) ; 64h, 1 bit per column which is hidden
+   ((EQ RTYPE 101)(PRINC "HIDDEN COL VECTOR W2")) ; 65h
    ((EQ RTYPE 102)(PRINC "PARSE RANGES"))
    ((EQ RTYPE 103)(PRINC "REGRESS RANGES"))
    ((EQ RTYPE 105)(PRINC "MATRIX RANGES"))
@@ -382,13 +393,17 @@
   ; DEBUG
   ;(PRINC "  DATA[")(PRIN1 RLEN)(PRINC "] = ")(PRIN1 BYTES)
     
-  ((EQ RTYPE 1)) ; break
+  ((EQ RTYPE 1)) ; EOF: break
  ) ; record loop
 
  (TERPRI)
  
  (CLOSE-INPUT-FILE FILE-NAME)
  (CLOSE-OUTPUT-FILE OFILE-NAME)
+ 
+ ; used range in worksheet
+ (TERPRI)
+ (PRINC "Range used in spreadsheet:") (PRIN1 TOP-LEFT)(PRINT BOT-RIGHT)
 
  ; compact memory
  (RECLAIM)
@@ -397,3 +412,4 @@
 ; ------------------------------------------------------------------
 (READ-WK1 "TEST.WK1")
 ;(READ-WK1 "PROTECTE.WK1")
+;(READ-WK1 "EXCEL.WK1")

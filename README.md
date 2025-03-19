@@ -3,7 +3,7 @@
 Files related to the muLISP programming language.
 
 muLISP was a LISP variant which had been developed by Soft Warehouse in Hawaii in 1977.
-Early versions were commercially available since 1979 for CP/M (8080,Z80), Apple II (native 6502/ADIOS as well as for the Z80 card), TRS-80 (Z80) and other Z80-based systems.
+Early versions were commercially available since 1979 for CP/M (8080, Z80), Apple II (native 6502/ADIOS as well as for the Z80 card), TRS-80 (Z80) and other Z80-based systems.
 
 In 1981 the rewritten code became available for the Intel 808x processor family and the MS-DOS operating system.
 The final version that was sold as a product was muLISP-90 (version 7.20, published in 1990).

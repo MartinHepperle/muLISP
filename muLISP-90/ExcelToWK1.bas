@@ -25,6 +25,7 @@ End Type
 Type IEEEdouble
     d As Double
 End Type
+
 ' ==========================================================
 '
 ' Test program
@@ -37,14 +38,15 @@ Sub testExportWK1()
     Dim formulasToText As Boolean
     
     ' too long for MS-DOS
-    fileName = Application.ActiveWorkbook.ActiveSheet.Name + "_" + Application.ActiveWorkbook.Name
+    fileName = Application.ActiveWorkbook.ActiveSheet.name + "_" + Application.ActiveWorkbook.name
     
-    fileName = "D:/DOS/123/EXCEL.WK1"
-    formulasToText = False
+    fileName = "F:/MH-AeroTools/DOS/123/EXCEL.WK1"
+    formulasToText = True
     
     Call exportWK1(fileName, formulasToText)
 
 End Sub
+
 ' ==========================================================
 '
 ' Export the used range of an Excel spreadsheet
@@ -107,12 +109,20 @@ For row = 1 To theSheet.UsedRange.Rows.count
         s = theCell.Text
         
         If Len(Trim$(s)) > 0 Then
-            ' cell is not empty    
+            ' cell is not empty
             
             If formulasToText And theCell.HasFormula Then
                 ' For now, we simply translate the whole sheband
-                ' to a text string for manual editing
+                ' to a text string for manual editing.
+                ' In 1-2-3 you have to remove the leading "'=" and,
+                ' in some equations, add a leading '+' character instead
                 s = theCell.Formula
+                s = Replace(s, "SUM(", "@SUM(")
+                s = Replace(s, "MIN(", "@MIN(")
+                s = Replace(s, "MAX(", "@MAX(")
+                s = Replace(s, "AVERAGE(", "@AVG(")
+                s = Replace(s, ":", "..")
+                Debug.Print s
                 
                 ' TODO: convert formula
                 ' - use a table with translation pairs "SIN" -> "@SIN"
@@ -172,6 +182,7 @@ Call putRecord(unit, theRecord)
 Close #unit
 
 End Sub
+
 ' ==========================================================
 ' Output one Lotus 1-2-3 WK1 file record to the file
 ' opened as unit.
@@ -183,6 +194,7 @@ Sub putRecord(unit As Integer, r As Record)
     Call putBytes(unit, r.rData(), r.rLength)
 
 End Sub
+
 ' ==========================================================
 ' Output one 16-bit word w to the file opened as unit.
 ' The word is written in Intel low-high-byte order.
@@ -193,6 +205,7 @@ Sub putWord(unit As Integer, w As Integer)
     Put #unit, , Chr$((w \ 256) And &HFF) ' high byte
 
 End Sub
+
 ' ==========================================================
 ' Output count 16-bit words from the array w()
 ' to the file opened as unit.
@@ -207,6 +220,7 @@ Sub putWords(unit As Integer, w() As Integer, count As Integer)
     Next i
 
 End Sub
+
 ' ==========================================================
 ' Output count Bytes from the array w()
 ' to the file opened as unit.
@@ -246,11 +260,12 @@ Sub copyStringZ(b() As Byte, idx As Integer, s As String)
     Next i
     b(idx) = 0
 End Sub
+
 ' ==========================================================
 ' Copy a Double into the byte array b(), starting at index idx.
 ' Apply some Basic trickery to convert the 8-byte IEEE 754 number
 ' into bytes.
-' The word is stored in Intel low-to-high-byte order.
+' The bytes are stored in Intel low-to-high-byte order.
 ' ----------------------------------------------------------
 Sub copyDouble(b() As Byte, idx As Integer, d As Double)
     Dim i As Integer

@@ -11,6 +11,7 @@ https://archive.org/details/mulispxm_202409
 Documentation:
 https://archive.org/details/mu-lisp-90-reference-manual
 
+- CLIPBRD.LSP contains functions to copy and paste text or numbers to the Windows clipboard..
 - DIFF.LSP is a derivative calculator for algebraic expressions in list form.
 - DIR.LSP is a simple MS-DOS directory list generator.
 - HEX-EDIT.LSP is a demonstration Hex-Editor program - no very LISP specific application, but maybe useful for learning.

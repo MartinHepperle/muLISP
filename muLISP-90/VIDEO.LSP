@@ -1,7 +1,7 @@
 ;
 ; Test-Image
 ;
-; VGA Screencopy to BPM file.
+; VGA Screencopy to BMP file.
 ;
 ; Martin Hepperle, 2024
 ;
@@ -56,6 +56,7 @@
 (DEFUN GRIDN(DELTA N A)
  (+ (* DELTA N) A)
 )
+
 ; A) draw grid ==================
 ; draw horizontal lines
 (SETQ Y 0)
@@ -176,7 +177,7 @@
  (INCQ X DX)
 )
 
-; G) PLOT-CIRCLE center x, center y, radius [, color]
+; I) PLOT-CIRCLE center x, center y, radius [, color]
 (PLOT-CIRCLE (SHIFT XRES -1) (SHIFT YRES -1) (SHIFT YRES -1) 15)
 
 
@@ -191,14 +192,59 @@
 ;   CS:856: 04=color DeskJet, printer type for PRINT-SCREEN
 ; 00000368: FF 2E 11 10 01 00 00 00 00 00 00 00 00 00 00 00 : ................
 
+; muLISP-90:
+; CS:57EC ... READ PIXEL: INT 10
+; 57EC:
+;  PUSH AX
+;  PUSH BX
+;  PUSH CX
+;  PUSH DX
+;  MOV BH,00
+;  MOV AH,0D
+;  INT 10   ; read pixel returns color in AL
+;  POP  DX
+;  POP  CX
+;  POP  BX
+;  SHL  BL,1 ; shift, bit 0 <- 0
+;  CMP  BYTE PTR CS:[0358],04   ; 856 = 04: color deskjet
+;  JZ   5820
+;  MOV  AH,CS:[03A1]   ; == 929 = COLOR
+;  TEST AH,80          ; COLOR == 128?   (CSMEMORY 929 128)
+;  JNZ  5815        
+;  CMP  AL,AH
+;  POP  AX
+;  JZ   5814           ; AL == 128
+;  INC  BL             ; -> 
+; 5814:
+;  RET
+; 5815:             ; AH = COLOR != 128
+;  AND  AH,7F       ; 01111111
+;  CMP  AL,AH       ; 
+;  POP  AX
+;  JNZ  581F        ; not ame color 
+;  INC  BL          ; same color
+; 581F:
+;  RET
+; 5820:
+;  AND  AL,[00D6]   ; 214 = 11010110
+;  JMP 581A
+; 5826:
+;  MOV  CX,[00A0]   ; 160
+;  MOV  AX,[00A2]   ; 162
+
+
 ; TIFF file format
 ; WRITE-SCREEN always creates a monochrome image with one plane.
 ; Only the pixels with the given color index (at CS:929) are dumped.
+; (CSMEMORY 929 0)     0: black pixels to white
+; (CSMEMORY 929 0)     1: white pixels to white
+; (CSMEMORY 929 128) 128: all non black pixels are dumped as white
+;
 (CSMEMORY 928 0) ; affects TIF orientation: 0 640x480, 1: 480x640
 (CSMEMORY 929 0) ; affects TIF output: 0: only color index 0 (black) -> white
 (OPEN-OUTPUT-FILE "VIDEO0.TIF" T)
 (WRITE-SCREEN (OUTPUT-FILE))
-(CLOSE-OUTPUT-FILE "VIDEO00.TIF")
+(CLOSE-OUTPUT-FILE "VIDEO0.TIF")
 ; 
 (CSMEMORY 929 15) ; output only color 15 (white) -> white
 (OPEN-OUTPUT-FILE "VIDEO15.TIF" T)
@@ -207,6 +253,7 @@
 ; 
 ; (CSMEMORY 856 4) ; color deskjet
 ; (PRINT-SCREEN)
+; (CSMEMORY 856 0) ; restore
 
 
 ; -----------------------------------------
@@ -269,6 +316,7 @@
  (WRITE-DWORD 0) ; word reserved1, reserved2
  ; bfOffset
  (WRITE-DWORD (+ bfHdrSize biHdrSize cmapSize)) ; offset to data = 14+104 = 118
+
  ; BITMAP_INFO header 40 + 4*16 = 104 bytes
  (WRITE-DWORD biHdrSize)     ; biHdrSize
  (WRITE-DWORD XRES)   ; biwidth
@@ -325,7 +373,7 @@
 )
 ; -----------------------------------------
 
-(WRITE-BMP "IMAGE.BMP" XRES YRES )
+(WRITE-BMP "VIDEO.BMP" XRES YRES )
 
 ; pause
 (SETQ I 32000)

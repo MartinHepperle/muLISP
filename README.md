@@ -6,7 +6,7 @@ muLISP was a LISP variant which had been developed by Soft Warehouse in Hawaii i
 Early versions were commercially available since 1979 for CP/M (8080, Z80), Apple II (native 6502/ADIOS as well as for the Z80 card), TRS-80 (Z80) and other Z80-based systems.
 
 In 1981 the rewritten code became available for the Intel 808x processor family and the MS-DOS operating system.
-The final version that was sold as a product was muLISP-90 (version 7.40, published in 1996(?)).
+The final version that was sold as a product was muLISP-90 (version 7.40, still on sale by TI in 2000).
 
 Since 1980 it was also licensed and distributed by Microsoft under the name "Microsoft LISP".
 

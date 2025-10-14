@@ -5,5 +5,4 @@ Derive was written in muLISP.
 
 Contact me, if you have additional versions of these programs and can create an archive with the files.
 
-User Manual for Derive 3.14:
-https://archive.org/details/derivecas314manual
+Derive 3.14: https://archive.org/details/derive314cas, user Manual: https://archive.org/details/derivecas314manual

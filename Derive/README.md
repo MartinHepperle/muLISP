@@ -5,8 +5,8 @@ Derive was written in muLISP.
 
 Contact me, if you have additional versions of these programs and can create an archive with the files.
 
-Derive 3.14: https://archive.org/details/derive314cas, user Manual: https://archive.org/details/derivecas314manual
-Derive 2-01: https://winworldpc.com/product/derive/2x
-Derive 2.60: https://winworldpc.com/product/derive/2x
-Derive 3.05: https://winworldpc.com/product/derive/3x
-Derive 3.13: https://winworldpc.com/product/derive/3x
+Derive 3.14: https://archive.org/details/derive314cas, user Manual: https://archive.org/details/derivecas314manual<br>
+Derive 2-01: https://winworldpc.com/product/derive/2x<br>
+Derive 2.60: https://winworldpc.com/product/derive/2x<br>
+Derive 3.05: https://winworldpc.com/product/derive/3x<br>
+Derive 3.13: https://winworldpc.com/product/derive/3x<br>

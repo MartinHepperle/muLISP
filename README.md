@@ -48,11 +48,13 @@ MS-DOS
 
 1988	muLISP-87	Version 6.10, 12/07/88
 
-1990	muLISP-90	Version 7.20 (02/07/94)
-
 1993	muLISP-90 XM	Version 7.16 (02/10/93)
 
+1993	muLISP-90 XM	Version 7.17 (07/14/93)
+
 1994	muLISP-90 XM	Version 7.20 (02/07/94)
+
+1995	muLISP-90 XM	Version 7.21 (08/09/95)
 
 1995	muLISP-90 XM	Version 7.30 (10/13/95)
 

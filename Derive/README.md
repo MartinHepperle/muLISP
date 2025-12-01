@@ -9,6 +9,7 @@ Soft Warehouse was extremely responsive to user comments and requests so that a 
 Derive 1.53: https://vetusware.com/download/Derive%201.53/?id=17264<br>
 Derive 1.6: https://vetusware.com/download/Derive/?id=15318<br>
 Derive 2.013: https://winworldpc.com/product/derive/2x<br>
+Derive 2.083: https://vetusware.com/download/Derive%202.08/?id=9104<br>
 Derive 2.55: https://vetusware.com/download/Derive%202.55/?id=11913<br>
 Derive 2.60: https://winworldpc.com/product/derive/2x and https://vetusware.com/download/DERIVE%202.60/?id=9011<br>
 Derive 3.05: https://winworldpc.com/product/derive/3x and https://vetusware.com/download/DERIVE/?id=4327<br>

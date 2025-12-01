@@ -13,3 +13,5 @@ Derive 2.60: https://winworldpc.com/product/derive/2x and https://vetusware.com/
 Derive 3.05: https://winworldpc.com/product/derive/3x and https://vetusware.com/download/DERIVE/?id=4327<br>
 Derive 3.13: https://winworldpc.com/product/derive/3x<br>
 Derive 3.14: https://archive.org/details/derive314cas and https://vetusware.com/download/Derive%203.14%203.14/?id=18701, user Manual: https://archive.org/details/derivecas314manual<br>
+Derive 4.11: https://vetusware.com/download/Derive%204.11/?id=8610 and https://vetusware.com/download/DERIVE%20with%20Acrospin%20for%20200LX/?id=9186 (with Acrospin 3D viewer)<br>
+Derive 6.1: https://vetusware.com/download/Derive%206.1%20Math%20Software/?id=11729<br>

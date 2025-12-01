@@ -5,7 +5,7 @@ Derive was written in muLISP.
 
 Soft Warehouse was extremely responsive to user comments and requests so that a number of small revisions for each major version were issued. Contact me, if you have additional versions of these programs (not highlighted in the document) and can create an archive with the files.
 
-<ul>A few versions can be found in these places:</ul><br>
+<p>A few versions can be found in these places:</p>
 Derive 1.53: https://vetusware.com/download/Derive%201.53/?id=17264<br>
 Derive 2.01: https://winworldpc.com/product/derive/2x<br>
 Derive 2.55: https://vetusware.com/download/Derive%202.55/?id=11913<br>

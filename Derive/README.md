@@ -3,7 +3,7 @@ Derive was written in muLISP.
 
 - Derive-Versions.pdf collects information about the known versions of muLISP, muMATH and Derive.
 
-Soft Warehouse was extremely responsive to user comments and requests so that a number of small revisions for each major version were issued. Contact me, if you have additional versions of these programs (not highlighted in the document) and can create an archive with the files.
+Soft Warehouse was extremely responsive to user comments and requests so that a number of small revisions for each major version were issued. Contact me, if you have additional versions of these programs (not highlighted in the document) and can create an archive for preserving the files.
 
 <p>A few versions can be found in these places:</p>
 Derive 1.53: https://vetusware.com/download/Derive%201.53/?id=17264<br>

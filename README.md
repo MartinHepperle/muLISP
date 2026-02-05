@@ -10,9 +10,9 @@ The final version that was sold as a product was muLISP-90 (version 7.40, still 
 
 Since 1980 it was also licensed and distributed by Microsoft under the name "Microsoft LISP".
 
-muLISP was intially developed for writing Computer Algebra Systems (CAS) like muMath (1979) and Derive (1988).
+muLISP was intially developed for writing Computer Algebra Systems (CAS) like muMath (1979) and Derive (1988). For creating muMath the more conventional syntax layer muSimp was implemented in muLISP.
 Derive for MS-DOS and MS-Windows had been very popular in the educational field.
-Derive was  taken over by Texas Instruments (TI) in 1999 for re-implementation in their pocket calculators (starting with the TI-92).
+Derive was taken over by Texas Instruments (TI) in 1999 for re-implementation in their pocket calculators (starting with the TI-92).
 TI ended the development of Derive for Windows in 2007. The last version was 6.10 for Windows 98, XP, 2000, written in muLISP for Derive, version 7.45 (which was not a product in itself).
 
 Known Versions

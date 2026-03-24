@@ -70,4 +70,4 @@ MS-DOS
 
 1995	muLISP-90 XM	Version 7.30 (10/13/95)
 
-1996(?)	muLISP-90 Version 7.40
+1996(?)	muLISP-90 Version 7.40 [detailed information and archival copy missing]

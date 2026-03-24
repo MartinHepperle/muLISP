@@ -20,21 +20,27 @@ Known Versions
 
 CP/M
 --------------
+1977	muLISP-77	Version (IMSAI 8080) - not published
+
 1980	muLISP-80	Version (8080), 10/06/80, before licensing to Microsoft
 
 1980	muLISP-80	Version 2.0, now "licensed by Microsoft"
 
-1981	muLISP-81	[detailed information missing]
+1980	muLISP-80	Version 2.15 [detailed information and archival copy missing]
 
-1982	muLISP-82	[detailed information missing]
+1981	muLISP-81	[detailed information and archival copy missing]
+
+1982	muLISP-82	[detailed information  and archival copy missing]
+
+1983	muLISP-83	Version 4.10, 03/07/84 [detailed information and archival copy missing]
 
 1984	muLISP-83	Version 4.11, 03/22/84
 
 MS-DOS
 --------------
-1981	muLISP-81	[detailed information missing]
+1981	muLISP-81	[detailed information and archival copy missing]
 
-1982	muLISP-82	[detailed information missing]
+1982	muLISP-82	[detailed information and archival copy missing]
 
 1984	muLISP-83	Version 4.11 03/22/84
 
@@ -42,13 +48,19 @@ MS-DOS
 
 1986	muLISP-86	Version 5.10, 01/06/86
 
+1986	muLISP-86	Version 5.11, 03/11/86 [detailed information and archival copy missing]
+
 1987	muLISP-87	Version 6.01, 06/17/87
 
-1988	muLISP-87	Version 6.03, 07/12/88
+1988	muLISP-87	Version 6.03, 07/12/88 [detailed information and archival copy missing]
 
 1988	muLISP-87	Version 6.10, 12/07/88
 
-1993	muLISP-90 XM	Version 7.16 (02/10/93)
+1990	muLISP-90 Version 7.10 [detailed information and archival copy missing]
+
+1990	muLISP-90 XM	Version 7.10 [detailed information and archival copy missing]
+
+1993	muLISP-90 XM	Version 7.16 (02/10/93) [detailed information and archival copy missing]
 
 1993	muLISP-90 XM	Version 7.17 (07/14/93)
 

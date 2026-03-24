@@ -1,6 +1,8 @@
 ; 
 ; Martin Hepperle, 2024
 ;
+; Various little functions
+;
 ; muLISP-90
 ;
 ; ========================================
@@ -34,21 +36,45 @@
 ; ((< 96 N 103) (- N 87)) ; a-f
  NIL
 )
-; Convert a string of two hex ASCII characters to its decimal nibble value
+; Convert a string of two hex ASCII characters to its decimal byte value
 (DEFUN HEX>BYTE ( C N )
- ((NEQ (LENGTH C) 2) NIL)
+ ((NEQ (LENGTH C) 2) NIL) ; oops
  (SETQ N (UNPACK C))
  ( + (* 16 (HEX>NIB (CAR N))) (HEX>NIB (CADR N)))
 )
 ; Convert a string of four hex ASCII characters to its decimal word value
 (DEFUN HEX>WORD ( C N )
- ((NEQ (LENGTH C) 4) NIL)
+ ((NEQ (LENGTH C) 4) NIL) ; oops
  (+ (* 256 (HEX>BYTE(SUBSTRING C 0 1))) (HEX>BYTE(SUBSTRING C 2 3)))
 )
 ; Convert a string of eight hex ASCII characters to its decimal dword value
 (DEFUN HEX>DWORD ( C N )
- ((NEQ (LENGTH C) 8) NIL)
+ ((NEQ (LENGTH C) 8) NIL) ; oops
  (+ (* 65536 (HEX>WORD(SUBSTRING C 0 3))) (HEX>WORD(SUBSTRING C 4 7)))
+)
+
+; ========================================
+; string functions
+; ========================================
+; for muLISTP-85 and earlier, part of muLISP-90
+(DEFUN STRING-LEFT-TRIM (INPUT TRIM-CHAR
+                         I)
+ ; trim leading TRIM-CHARs
+ (SETQ I 0)
+ (LOOP ((NEQ TRIM-CHAR (SUBSTRING INPUT I I))) ; break on first non-matching character
+       (INCQ I)
+ )
+ (SUBSTRING INPUT I)
+)
+; for muLISTP-85 and earlier, part of muLISP-90
+(DEFUN STRING-RIGHT-TRIM (INPUT TRIM-CHAR
+                         I)
+ ; trim trailing TRIM-CHARs
+ (SETQ I (LENGTH INPUT))
+ (LOOP (DECQ I)
+       ((NEQ TRIM-CHAR (SUBSTRING INPUT I I))) ; break on first non-matching character
+ )
+ (SUBSTRING INPUT 0 I)
 )
 
 ; Concatenate two strings into a single string
@@ -77,7 +103,7 @@
 
 ; FILENAME string
 (DEFUN DUMP-FILE ( FILENAME 
- BYTE LINE ASCI FILOFF) ; local
+                   BYTE LINE ASCI FILOFF) ; local
 
  ((IF (EQ NIL (OPEN-INPUT-FILE FILENAME)) (PROG1(PRINC "Cannot open input file")(TERPRI))))
  
@@ -98,7 +124,7 @@
    ((NOT (LISTEN)) NIL) ; break at EOF
    ((ZEROP NUM))        ; break when NUM == 0
    (SETQ BYTE (READ-BYTE))
-   (SETQ LINE (STRLCAT (LIST LINE (BYTE-HEX BYTE) " ")))
+   (SETQ LINE (STRLCAT (LIST LINE (BYTE>HEX BYTE) " ")))
    (SETQ ASCI (STR2CAT ASCI (IF (OR (< BYTE 32) 
                                     (> BYTE 128)) "." (ASCII BYTE))))
    (DECQ NUM)
@@ -120,23 +146,23 @@
  (CLOSE-INPUT-FILE FILENAME)
 )
 
-(DEFUN DUMP-DS ( FILOFF BYTES
+(DEFUN DUMP-DS ( OFF BYTES
   LINE BYTE NUM ASCI LEN ) ; local
- ; hex dump BYTES in data segment, starting from offset FILOFF
+ ; hex dump BYTES in data segment, starting from offset OFF
  (LOOP
   ((ZEROP BYTES) NIL) ; break
   ; build one line of 16 hex bytes and ASCII characters
-  (SETQ LINE (STR2CAT (DWORD>HEX FILOFF) ": "))
+  (SETQ LINE (STR2CAT (DWORD>HEX OFF) ": "))
   (SETQ ASCI ": ") ; preset with separator
   ; read up to 16 bytes per line
   (SETQ NUM 16)
   (LOOP
    ((ZEROP BYTES) NIL)    ; break at end
    ((ZEROP NUM))          ; break when end of 16 byte line NUM == 0
-   (SETQ BYTE (DSMEMORY FILOFF))
-   (INCQ FILOFF)
+   (SETQ BYTE (DSMEMORY OFF))
+   (INCQ OFF)
    (DECQ BYTES)
-   (SETQ LINE (STRLCAT (LIST LINE (BYTE-HEX BYTE) " ")))
+   (SETQ LINE (STRLCAT (LIST LINE (BYTE>HEX BYTE) " ")))
    (SETQ ASCI (STR2CAT ASCI (IF (OR (< BYTE 32) 
                                     (> BYTE 128)) "." (ASCII BYTE))))
    (DECQ NUM)
@@ -154,28 +180,28 @@
  )
 )
 
-(DEFUN WDUMP-DS ( FILOFF WORDS
+(DEFUN WDUMP-DS ( OFF WORDS
   LINE HIBYTE LOBYTE NUM ASCI LEN ) ; local
- ; hex dump WORDS in data segment, starting from offset FILOFF
+ ; hex dump WORDS in data segment, starting from offset OFF
  ; (word display has bytes swapped c.f. ASCII display)
  (LOOP
   ((ZEROP WORDS) NIL) ; break
   ; build one line of 8 hex words and ASCII characters
-  (SETQ LINE (STR2CAT (DWORD>HEX FILOFF) ": "))
+  (SETQ LINE (STR2CAT (DWORD>HEX OFF) ": "))
   (SETQ ASCI ": ") ; preset with separator
   ; read up to 8 words per line
   (SETQ NUM 8)
   (LOOP
    ((ZEROP WORDS) NIL)    ; break at end
    ((ZEROP NUM))          ; break when end of 8 word line NUM == 0
-   (SETQ LOBYTE (DSMEMORY FILOFF))   ; Intel: little endian
-   (INCQ FILOFF)
-   (SETQ HIBYTE (DSMEMORY FILOFF))
-   (INCQ FILOFF)
+   (SETQ LOBYTE (DSMEMORY OFF))   ; Intel: little endian
+   (INCQ OFF)
+   (SETQ HIBYTE (DSMEMORY OFF))
+   (INCQ OFF)
    (DECQ WORDS)
    ; (SETQ LINE (STRLCAT (LIST LINE (WORD>HEX (+ (* HIBYTE 256) LOBYTE)) " ")))
    ; equivalent:
-   (SETQ LINE (STRLCAT (LIST LINE (BYTE-HEX HIBYTE) (BYTE-HEX LOBYTE) " ")))
+   (SETQ LINE (STRLCAT (LIST LINE (BYTE>HEX HIBYTE) (BYTE>HEX LOBYTE) " ")))
    (SETQ ASCI (STR2CAT ASCI (IF (OR (< LOBYTE 32) 
                                     (> LOBYTE 128)) "." (ASCII LOBYTE))))
    (SETQ ASCI (STR2CAT ASCI (IF (OR (< HIBYTE 32) 
@@ -197,22 +223,22 @@
 )
 
 ; data segment muLISP-90 7.20
-;                  0100    ; start of symbols
+;       BEGSYM     : 0100    ; start of symbols
 ;                          ... symbols, grows upwards
-; 0000  ENDSYM     : 0712    ; end of symbols
+; 0000  ENDSYM     : 2990    ; end of symbols
 
-; 0002  ENDNUM     : 2DA8    ; end of numbers?
+; 0002  ENDNUM     : 2984    ; end of numbers?
 ;                          ... numbers, grows downwards
 ; 0004  ENDATM     : 2E40    ; end of numbers
 ;                          ... conses, grows upwards
-; 0006  ENDCNS     : 4952    ; end of cons
+; 0006  ENDCNS     : 4992    ; end of cons
 ;                          ... free
 ; 0008  MAXCNS     : 0000    ; maximum size of cons space
 ; ...
-; 0010  DEFSEG     : 34C1    ; Segment pointer function/longueur
-; 0012  PNPSEG     : 37A5    ; Segment pointer Pname/vector
-; 0014  PNSSEG     : 14CF    ; Segment des Pnames
-; 0016  VECSEG     : 24C1    ; Segment des vecteurs   num,riques
+; 0010  DEFSEG     : 34C1    ; Segment of function definition pointers
+; 0012  PNPSEG     : 37A5    ; Segment of Pname pointers
+; 0014  PNSSEG     : 14C1    ; Segment of Pnames
+; 0016  VECSEG     : 24C1    ; Segment of vectors
 ; dump the above memory items
 (DEFUN DUMP-MEM ()
  (PRINC "BEG SYM =         : 0100")(TERPRI)
@@ -243,7 +269,7 @@
    (SETQ BYTE (CSMEMORY FILOFF))
    (INCQ FILOFF)
    (DECQ BYTES)
-   (SETQ LINE (STRLCAT (LIST LINE (BYTE-HEX BYTE) " ")))
+   (SETQ LINE (STRLCAT (LIST LINE (BYTE>HEX BYTE) " ")))
    (SETQ ASCI (STR2CAT ASCI (IF (OR (< BYTE 32) 
                                     (> BYTE 128)) "." (ASCII BYTE))))
    (DECQ NUM)
@@ -314,37 +340,47 @@
 ; BF 00 01 MOV DI,100  ; return address of LISP NIL variable
 ; C3       RET
 ;
-; defines a binary function MYFUNC
+; loads and defines a binary function MYFUNC
+;
 (DEFUN GOGO( OFFSET
   BYTES OFFSET ) ; local
- (SETQ BYTES 398)                      ; ALLOCATE block
- (SETQ OFFSET (ALLOCATE BYTES))         ; TODO: should test allocation for NIL
- (INCQ OFFSET)
- (IF (NEQ (BINARY-LOAD "TEST.COM" OFFSET) BYTES)
-  (PROGN((WRITE-STRING "Oops cannot BINARY-LOAD file TEST.COM")
+ (SETQ BYTES 398)                      ; ALLOCATE block + 1 for making start address odd
+ (SETQ OFFSET (ALLOCATE (+ 1 BYTES)))  ; TODO: should test allocation for NIL
+
+ (IF(NULL OFFSET)
+  (PROGN((WRITE-STRING "Oops cannot allocate memory for TEST.COM")
          (TERPRI))
   )
   ; else
   (PROGN
-   (PUTD 'MYFUNC OFFSET)  ; obviously argument must be < 32768?
-   (PRINT (GETD MYFUNC))  ; the rest is just for debugging
-   (PRINT 
-   (STRLCAT
-    (LIST 
-     "Read from file to address "
-     (WORD>HEX OFFSET) ":" 
-     (BYTE-HEX (CSMEMORY OFFSET)) " "
-     (BYTE-HEX (CSMEMORY (+ OFFSET 1))) " "
-     (BYTE-HEX (CSMEMORY (+ OFFSET 2))) " "
-     (BYTE-HEX (CSMEMORY (+ OFFSET 3))) " "
-     (BYTE-HEX (CSMEMORY (+ OFFSET 4))) " "
-     (BYTE-HEX (CSMEMORY (+ OFFSET 5))) " "
-     (BYTE-HEX (CSMEMORY (+ OFFSET 6)))
-     )
+   (INCQ OFFSET)                         ; make ODD
+   (IF (NEQ (BINARY-LOAD "TEST.COM" OFFSET) BYTES)
+    (PROGN((WRITE-STRING "Oops cannot BINARY-LOAD file TEST.COM")
+           (TERPRI))
     )
-   )
-  )
- )
+    ; else block
+    (PROGN
+     (PUTD 'MYFUNC OFFSET)  ; obviously argument must be < 32768?
+     (PRINT (GETD MYFUNC))  ; the rest is just for debugging
+     (PRINT 
+     (STRLCAT
+      (LIST 
+       "Read from file to address "
+       (WORD>HEX OFFSET) ":" 
+       (BYTE>HEX (CSMEMORY OFFSET)) " "
+       (BYTE>HEX (CSMEMORY (+ OFFSET 1))) " "
+       (BYTE>HEX (CSMEMORY (+ OFFSET 2))) " "
+       (BYTE>HEX (CSMEMORY (+ OFFSET 3))) " "
+       (BYTE>HEX (CSMEMORY (+ OFFSET 4))) " "
+       (BYTE>HEX (CSMEMORY (+ OFFSET 5))) " "
+       (BYTE>HEX (CSMEMORY (+ OFFSET 6)))
+       ) ; end of LIST block
+      )
+     ) ; end of PRINT block
+    ) ; end of else block
+   ) ; end of if (BINARY-LOAD) else block 
+  ) ; end of else block
+ ) ; end of if (NULL OFFSET) else block 
  OFFSET
 )
 
@@ -497,3 +533,57 @@
 ; $ (AREF A1 1 2)
 ; 6
 
+; format right aligned floating point number
+; 000000000000  WIDTH    = 12
+;       0.7500  DECIMALS = 4
+; Note: number is truncated, not rounded
+(DEFUN FORMAT (X WIDTH DECIMALS
+               V L)
+ (SETQ V (PACK* X)) ; convert
+ ; integer to float by appending a '.'
+ (IF (NULL (FINDSTRING '. V))(SETQ V (PACK* V '.)))
+
+ (SETQ V (PACK* V (PACK (MAKE-LIST WIDTH '0))))
+ (SETQ L (FINDSTRING '. V))
+ (SETQ V (SUBSTRING V 0 (+ L DECIMALS) ))
+ 
+ (SETQ L (LENGTH V))
+ (IF (< L WIDTH)
+   (SETQ V (PACK* (PACK (MAKE-LIST (- WIDTH L) " ")) V)))
+ V
+)
+
+; MEAN value
+(DEFUN MEAN (X
+             M L)
+ (SETQ M 0.0)
+ (SETQ L (LENGTH X))
+ (LOOP
+  ((ZEROP (LENGTH X)))
+  (SETQ M (+ M (CAR X)))
+  (SETQ X (CDR X))
+ )
+ (/ M L)
+)
+
+; MEDIAN value
+; (0 1 2 3 4)   MEDIAN = 2
+; (0 1 2 3 4 5) MEDIAN = (2+3)/2
+(DEFUN MEDIAN (X
+               L)
+ (SETQ X (SORT X '<))
+ (SETQ L (LENGTH X))
+ (IF (ODDP L) 
+  (NTH (/ (- L 1) 2) X) ; take the middle value
+  (/ (+ (NTH (/ L 2) X) (NTH (- (/ L 2) 1) X)) 2)
+ ) ; take the mean of the two values around the middle
+)
+
+; COMBinationS of K items taken from a set of N
+; (COMBS 5 2) = 10: [54 53 52 51 43 42 41 32 31 21]
+; (COMBS 5 3) = 10: [543 542 541 532 531 521 432 431 421 321]
+; (COMBS 5 4) = 5:  [5432 5431 5421 5321 4321]
+(DEFUN COMBS (N K)
+ ((ZEROP K) 1)
+ (/ (* N (COMBS (- N 1)(- K 1))) K)
+)
